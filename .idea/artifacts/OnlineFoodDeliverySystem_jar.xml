@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="OnlineFoodDeliverySystem:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/OnlineFoodDeliverySystem_jar</output-path>
+    <root id="archive" name="OnlineFoodDeliverySystem.jar">
+      <element id="module-output" name="OnlineFoodDeliverySystem" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/activation-1.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/mysql-connector-java-8.0.28.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/javax.mail-1.6.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
