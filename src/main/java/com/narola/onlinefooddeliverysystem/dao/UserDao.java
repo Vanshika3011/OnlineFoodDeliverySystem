@@ -1,11 +1,14 @@
+/*
 package com.narola.onlinefooddeliverysystem.dao;
 
-import com.narola.onlinefooddeliverysystem.exception.DAOLayerException;
-import com.narola.onlinefooddeliverysystem.model.User;
+import com.narola.onlinefooddeliverysystemV1.exception.DAOLayerException;
+import com.narola.onlinefooddeliverysystemV1.model.User;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.narola.onlinefooddeliverysystem.utility.Utility.encryptPassword;
+import static com.narola.onlinefooddeliverysystemV1.utility.Utility.encryptPassword;
 
 public class UserDao {
 
@@ -49,7 +52,8 @@ public class UserDao {
         }
     }
 
-    public static void getUsersDetails(int roleId) throws DAOLayerException{
+    public static List<User> getUsersDetails(int roleId) throws DAOLayerException{
+        List<User> userList = new ArrayList<>();
         try {
             String query = "Select u.id, u.username, u.firstName, u.lastName, u.contact, u.email from user u where role_id = ?";
             Connection conn = DBConnection.getInstance().getConnection();
@@ -57,16 +61,22 @@ public class UserDao {
 
             stmt.setInt(1, roleId);
             ResultSet rs = stmt.executeQuery();
-            System.out.println("Id\tUsername\t\tContact\t\t EmailId\t\t\t Firstname\t Lastname");
+
             while (rs.next()) {
-                System.out.println(rs.getInt(1) + "\t" + rs.getString(2) + "\t\t" + rs.getString(5) + "\t " + rs.getString(6) + "\t " + rs.getString(3) + "\t " +
-                        rs.getString(4));
+                User user = new User();
+                user.setUserId(rs.getInt(1));
+                user.setUsername(rs.getString(2));
+                user.setContact(rs.getString(5));
+                user.setEmail(rs.getString(6));
+                user.setFirstName(rs.getString(3));
+                user.setLastName(rs.getString(4));
+                userList.add(user);
             }
         } catch (SQLException e) {
             throw new DAOLayerException("Exception occurred while fetching user details", e);
         } catch (Exception e) {
             throw new DAOLayerException("Exception occurred while fetching user details", e);
-        }
+        }return userList;
     }
 
     public static void createUser(User user) throws DAOLayerException{
@@ -143,4 +153,4 @@ public class UserDao {
             throw new DAOLayerException("Exception occurred while updating user details", e);
         }
     }
-}
+}*/

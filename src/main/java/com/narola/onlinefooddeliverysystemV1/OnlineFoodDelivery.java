@@ -1,20 +1,21 @@
 package com.narola.onlinefooddeliverysystemV1;
 
-import com.narola.onlinefooddeliverysystem.menu.Menu;
-import com.narola.onlinefooddeliverysystem.utility.ProgramTerminator;
+import com.narola.onlinefooddeliverysystemV1.menu.AppMenu;
+import com.narola.onlinefooddeliverysystemV1.utility.ProgramTerminator;
 import com.narola.onlinefooddeliverysystemV1.manager.UserManager;
 
-import static com.narola.onlinefooddeliverysystem.constant.Constants.*;
+import static com.narola.onlinefooddeliverysystemV1.constant.Constants.*;
 
 public class OnlineFoodDelivery {
+
+    public static UserManager userManager = new UserManager();
 
     static {
         System.out.println("\n-------Welcome to Foodies-------\n");
     }
 
     public static void main(String[] args) {
-        int choice = Menu.displayMainMenuAndTakeInput();
-        UserManager userManager = new UserManager();
+        int choice = AppMenu.displayMainMenuAndTakeInput();
         switch (choice) {
             case MENU_SIGNUP:
                 userManager.doSignup();
@@ -29,5 +30,6 @@ public class OnlineFoodDelivery {
                 System.out.println("Invalid Choice!!");
                 main(null);
         }
+        main(null);
     }
 }

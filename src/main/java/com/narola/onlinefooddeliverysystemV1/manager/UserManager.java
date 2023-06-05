@@ -1,13 +1,16 @@
 package com.narola.onlinefooddeliverysystemV1.manager;
 
-import com.narola.onlinefooddeliverysystem.model.User;
+import com.narola.onlinefooddeliverysystemV1.menu.AppMenu;
+import com.narola.onlinefooddeliverysystemV1.model.User;
 import com.narola.onlinefooddeliverysystemV1.service.UserService;
 import com.narola.onlinefooddeliverysystemV1.view.UserView;
+
+import java.util.List;
 
 public class UserManager {
 
     private UserView userView = new UserView();
-    private UserService userService = new UserService();
+    private static UserService userService = new UserService();
 
     public void doSignup() {
         User user = userView.getSignUpInformationFromUser();
@@ -19,5 +22,10 @@ public class UserManager {
         userService.doLogin(user);
     }
 
+    public void getUserListByRole() {
+        int userRoleID = AppMenu.displayUserDetailsMenuAndTakeInput();
+        List<User> userList = userService.getUserDetailsListByRoleID(userRoleID);
+        userView.printUsersDetails(userList);
+    }
 
 }

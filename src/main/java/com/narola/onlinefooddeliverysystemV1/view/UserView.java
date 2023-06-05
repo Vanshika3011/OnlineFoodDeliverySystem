@@ -1,13 +1,19 @@
 package com.narola.onlinefooddeliverysystemV1.view;
 
-import com.narola.onlinefooddeliverysystem.dao.UserDao;
-import com.narola.onlinefooddeliverysystem.enums.UserRoles;
-import com.narola.onlinefooddeliverysystem.exception.DAOLayerException;
-import com.narola.onlinefooddeliverysystem.input.InputHandler;
-import com.narola.onlinefooddeliverysystem.model.User;
-import com.narola.onlinefooddeliverysystem.validation.Validation;
+import com.narola.onlinefooddeliverysystemV1.dao.UserDao;
+import com.narola.onlinefooddeliverysystemV1.enums.UserRoles;
+import com.narola.onlinefooddeliverysystemV1.exception.DAOLayerException;
+import com.narola.onlinefooddeliverysystemV1.input.InputHandler;
+import com.narola.onlinefooddeliverysystemV1.model.User;
+import com.narola.onlinefooddeliverysystemV1.service.UserService;
+import com.narola.onlinefooddeliverysystemV1.validation.Validation;
+
+import java.util.List;
 
 public class UserView {
+
+    private UserDao userDao = new UserDao();
+    private static UserService userService = new UserService();
 
     public void displayUserRoleForSignUp() {
         UserRoles[] roles = UserRoles.values();
@@ -19,12 +25,12 @@ public class UserView {
     }
 
     public User getSignUpInformationFromUser() {
-        this.displayUserRoleForSignUp();
-        int roleId = InputHandler.getNumberInput();
 
         User user = new User();
 
         System.out.println("Please select your role ");
+        this.displayUserRoleForSignUp();
+        int roleId = InputHandler.getNumberInput();
         while (roleId == UserRoles.ADMIN.getRoleIdValue()) {
             System.out.println("Invalid Role Id selected. Enter valid role id!");
             roleId = InputHandler.getNumberInput();
@@ -52,27 +58,27 @@ public class UserView {
                 continue;
             }
             try {
-                if (!UserDao.doesUsernameExist(username)) break;
+                if (!userDao.isUsernameExist(username)) break;
             } catch (DAOLayerException e) {
                 e.printStackTrace();
             }
-            System.out.println("Username already exist.");
+            System.out.println("Username already exist. PLease enter username.");
             username = InputHandler.getStringInput();
         }
         user.setUsername(username);
 
-        System.out.println("Enter password");
+        System.out.println("Enter password : ");
         String password = InputHandler.getStringInput();
         Validation.validatePassword(password);
         user.setPassword(password);
 
-        System.out.println("Enter your First Name");
+        System.out.println("Enter your First Name : ");
         user.setFirstName(InputHandler.getStringInput());
 
-        System.out.println("Enter your Last Name");
+        System.out.println("Enter your Last Name : ");
         user.setLastName(InputHandler.getStringInput());
 
-        System.out.println("Enter your Contact Number");
+        System.out.println("Enter your Contact Number : ");
         String contactNumber = InputHandler.getStringInput(true);
         boolean isContactValid = false;
         while (!isContactValid) {
@@ -80,7 +86,7 @@ public class UserView {
                 break;
             }
             if (!Validation.isDigitsOnly(null)) {
-                System.out.println("Enter valid contact details");
+                System.out.println("Enter valid contact details.");
                 contactNumber = InputHandler.getStringInput(true);
                 continue;
             }
@@ -93,7 +99,7 @@ public class UserView {
         }
         user.setContact(contactNumber);
 
-        System.out.println("Enter your Email");
+        System.out.println("Enter your Email : ");
         String email = InputHandler.getStringInput();
         boolean isEmailValid = false;
         while (!isEmailValid) {
@@ -103,7 +109,7 @@ public class UserView {
                 continue;
             }
             try {
-                if (UserDao.doesUserEmailExist(email)) {
+                if (userDao.isUserEmailExist(email)) {
                     System.out.println("Email already exist. Please Enter email.");
                     email = InputHandler.getStringInput();
                 } else {
@@ -119,15 +125,15 @@ public class UserView {
 
     public User getLoginInformationFromUser() {
         User user = new User();
-        System.out.println("Please enter your username");
+        System.out.println("Please enter your username : ");
         user.setUsername(InputHandler.getStringInput());
-        System.out.println("Please enter your password");
+        System.out.println("Please enter your password : ");
         user.setPassword(InputHandler.getStringInput());
         return user;
     }
 
     public int getVerificationCodeFromUser() {
-        System.out.println("Please enter your verification code.");
+        System.out.println("Please enter your verification code : ");
         return InputHandler.getNumberInput();
     }
 
@@ -143,5 +149,27 @@ public class UserView {
         System.out.println("Welcome " + user.getFirstName() + " " + user.getLastName() + ".");
     }
 
+    public void printUsersDetails(List<User> userList) {
+        if (userList == null || userList.isEmpty()) {
+            System.out.println("No user present.");
+            return;
+        }
+        System.out.println("Id\tUsername\tContact No\tEmail\t\t\t\tName\t\tSurname");
+        for (User user : userList) {
+            System.out.println(user.getUserId() + "\t" + user.getUsername() + " \t" + user.getContact() + "\t" + user.getEmail() + "\t" + user.getFirstName() + "\t" + user.getLastName());
+        }
+    }
+
+    public int displayRestaurantAdminsAndGetOwnerIdFromAdmin() {
+        List<User> userList = userService.getUserDetailsListByRoleID(UserRoles.RESTAURANTADMIN.getRoleIdValue());
+        printUsersDetails(userList);
+        System.out.println("Enter owner ID : ");
+        return InputHandler.getNumberInput();
+    }
+
+    public String getItemNameFromCustomer() {
+        System.out.println("Enter food item name : ");
+        return InputHandler.getStringInput();
+    }
 
 }

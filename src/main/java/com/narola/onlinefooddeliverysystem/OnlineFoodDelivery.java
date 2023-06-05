@@ -1,10 +1,10 @@
+/*
 package com.narola.onlinefooddeliverysystem;
 
-import com.narola.onlinefooddeliverysystem.menu.Menu;
-import com.narola.onlinefooddeliverysystem.model.service.user.UserManager;
-import com.narola.onlinefooddeliverysystem.utility.ProgramTerminator;
+import com.narola.onlinefooddeliverysystemV1.menu.Menu;
+import com.narola.onlinefooddeliverysystemV1.utility.ProgramTerminator;
 
-import static com.narola.onlinefooddeliverysystem.constant.Constants.*;
+import static com.narola.onlinefooddeliverysystemV1.constant.Constants.*;
 
 public class OnlineFoodDelivery {
 
@@ -34,3 +34,4 @@ public class OnlineFoodDelivery {
         }
     }
 }
+*/

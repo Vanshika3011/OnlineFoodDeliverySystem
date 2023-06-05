@@ -1,14 +1,16 @@
 package com.narola.onlinefooddeliverysystemV1.dao;
 
-import com.narola.onlinefooddeliverysystem.exception.DAOLayerException;
-import com.narola.onlinefooddeliverysystem.model.User;
+import com.narola.onlinefooddeliverysystemV1.exception.DAOLayerException;
+import com.narola.onlinefooddeliverysystemV1.model.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.narola.onlinefooddeliverysystem.utility.Utility.encryptPassword;
+import static com.narola.onlinefooddeliverysystemV1.utility.Utility.encryptPassword;
 
 public class UserDao {
 
@@ -52,7 +54,8 @@ public class UserDao {
         }
     }
 
-    public void getUsersDetails(int roleId) throws DAOLayerException {
+    public List<User> getUsersDetails(int roleId) throws DAOLayerException {
+        List<User> userList = new ArrayList<>();
         try {
             String query = "Select u.id, u.username, u.firstName, u.lastName, u.contact, u.email from user u where role_id = ?";
             Connection conn = DBConnection.getInstance().getConnection();
@@ -60,19 +63,26 @@ public class UserDao {
 
             stmt.setInt(1, roleId);
             ResultSet rs = stmt.executeQuery();
-            System.out.println("Id\tUsername\t\tContact\t\t EmailId\t\t\t Firstname\t Lastname");
+
             while (rs.next()) {
-                System.out.println(rs.getInt(1) + "\t" + rs.getString(2) + "\t\t" + rs.getString(5) + "\t " + rs.getString(6) + "\t " + rs.getString(3) + "\t " +
-                        rs.getString(4));
+                User user = new User();
+                user.setUserId(rs.getInt(1));
+                user.setUsername(rs.getString(2));
+                user.setContact(rs.getString(5));
+                user.setEmail(rs.getString(6));
+                user.setFirstName(rs.getString(3));
+                user.setLastName(rs.getString(4));
+                userList.add(user);
             }
         } catch (SQLException e) {
             throw new DAOLayerException("Exception occurred while fetching user details", e);
         } catch (Exception e) {
             throw new DAOLayerException("Exception occurred while fetching user details", e);
         }
+        return userList;
     }
 
-    public void createUser(User user) throws DAOLayerException {
+    public int createUser(User user) throws DAOLayerException {
         try {
             String query = "Insert into `user` (username, password, firstName, lastName, contact, email, role_id,verification_code) " +
                     "values(?,?,?,?,?,?,?,?)";
@@ -88,7 +98,7 @@ public class UserDao {
             stmt.setInt(7, user.getRoleId());
             stmt.setInt(8, user.getVerificationCode());
 
-            stmt.executeUpdate();
+            return stmt.executeUpdate();
         } catch (SQLException e) {
             throw new DAOLayerException("Exception occurred while updating user details", e);
         } catch (Exception e) {
@@ -97,6 +107,7 @@ public class UserDao {
     }
 
     public User validateUser(User user) throws DAOLayerException {
+        User user1 = null;
         try {
             String query = "Select * from user where username = ?  and password = ?";
             Connection conn = DBConnection.getInstance().getConnection();
@@ -104,26 +115,22 @@ public class UserDao {
             stmt.setString(1, user.getUsername());
             stmt.setString(2, encryptPassword(user.getPassword()));
             ResultSet rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return null;
+            if (rs.next()) {
+                user1 = new User();
+                user1.setUserId(rs.getInt(1));
+                user1.setFirstName(rs.getString(4));
+                user1.setLastName(rs.getString(5));
+                user1.setContact(rs.getString(6));
+                user1.setEmail(rs.getString(7));
+                user1.setRoleId(rs.getInt(8));
+                user1.setVerificationCode(rs.getInt(9));
+                user1.setVerified(rs.getBoolean(10));
+                user1.setCreatedAt(rs.getTimestamp(11).toLocalDateTime());
+                user1.setUpdatedAt(rs.getTimestamp(12).toLocalDateTime());
+                user1.setCreatedBy(rs.getInt(13));
+                user1.setUpdatedBy(rs.getInt(14));
             }
-            rs.previous();
-            while (rs.next()) {
-                user.setUserId(rs.getInt(1));
-                user.setFirstName(rs.getString(4));
-                user.setLastName(rs.getString(5));
-                user.setContact(rs.getString(6));
-                user.setEmail(rs.getString(7));
-                user.setRoleId(rs.getInt(8));
-                user.setVerificationCode(rs.getInt(9));
-                user.setVerified(rs.getBoolean(10));
-                user.setCreatedAt(rs.getTimestamp(11).toLocalDateTime());
-                user.setUpdatedAt(rs.getTimestamp(12).toLocalDateTime());
-                user.setCreatedBy(rs.getInt(13));
-                user.setUpdatedBy(rs.getInt(14));
-            }
-            return user;
-
+            return user1;
         } catch (SQLException e) {
             throw new DAOLayerException("Exception occurred while fetching user details", e);
         } catch (Exception e) {

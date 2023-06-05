@@ -1,26 +1,42 @@
 package com.narola.onlinefooddeliverysystemV1.service;
 
-import com.narola.onlinefooddeliverysystem.email.MailSender;
-import com.narola.onlinefooddeliverysystem.exception.DAOLayerException;
-import com.narola.onlinefooddeliverysystem.exception.MailException;
-import com.narola.onlinefooddeliverysystem.model.User;
-import com.narola.onlinefooddeliverysystem.utility.Utility;
 import com.narola.onlinefooddeliverysystemV1.OnlineFoodDelivery;
 import com.narola.onlinefooddeliverysystemV1.dao.UserDao;
+import com.narola.onlinefooddeliverysystemV1.email.MailSender;
+import com.narola.onlinefooddeliverysystemV1.exception.DAOLayerException;
+import com.narola.onlinefooddeliverysystemV1.exception.MailException;
+import com.narola.onlinefooddeliverysystemV1.manager.RoleManager;
+import com.narola.onlinefooddeliverysystemV1.manager.UserManager;
+import com.narola.onlinefooddeliverysystemV1.model.User;
+import com.narola.onlinefooddeliverysystemV1.session.CurrentUserCredentials;
+import com.narola.onlinefooddeliverysystemV1.utility.Utility;
 import com.narola.onlinefooddeliverysystemV1.view.UserView;
+
+import java.util.List;
+
+import static com.narola.onlinefooddeliverysystemV1.constant.Constants.*;
 
 public class UserService {
 
-    private UserView userView = new UserView();
+    private static UserView userView = new UserView();
     private MailSender mailSender = new MailSender();
     private UserDao userDao = new UserDao();
+    private static RoleManager roleManager = new RoleManager();
+    private UserManager userManager = new UserManager();
+
+    private static int count = 1;
 
     public void doSignUp(User user) {
         user.setVerificationCode(Utility.generateVerificationCode());
         try {
             sendMail(user);
-            userDao.createUser(user);
-            OnlineFoodDelivery.main(null);
+            int isAdded = userDao.createUser(user);
+            if (isAdded > 0) {
+                userView.displayInfoMessage("You have signed up successfully.");
+            } else {
+                userView.displayErrorMessage("Failed to Sign-up.Please try again.");
+                OnlineFoodDelivery.main(null);
+            }
         } catch (MailException e) {
             e.printStackTrace();
             OnlineFoodDelivery.main(null);
@@ -42,25 +58,31 @@ public class UserService {
         } catch (DAOLayerException ex) {
             ex.printStackTrace();
             userView.displayErrorMessage("Ops, Something went wrong. please try after sometime");
-            //Redirect to MainMenu
+            return;
         }
         if (user == null) {
-            userView.displayErrorMessage("Wrong credentials");
-            doLogin(userView.getLoginInformationFromUser());
-        }
-        try {
-            if (checkAccountVerification(user)) {
-                userView.displayInfoMessage("Verification successful!");
-                userView.displayInfoMessage("Logged in Successfully.");
-                userView.displayLoginWelcomeMessage(user);
+            if (count == MAX_TRIALS_FOR_LOGIN) {
+                userView.displayErrorMessage("Try again Later");
+                count = 1;
             } else {
-                //TODO : Retry max 4 times and Redirect to MainMenu
-
+                userView.displayErrorMessage("Wrong credentials.");
+                count++;
+                userManager.doLogin();
             }
-        } catch (DAOLayerException ex) {
-            ex.printStackTrace();
-            userView.displayErrorMessage("Ops, Something went wrong. please try after sometime");
-            //Redirect to MainMenu
+        } else {
+            try {
+                if (checkAccountVerification(user)) {
+                    userView.displayInfoMessage("Logged in Successfully.");
+                    userView.displayLoginWelcomeMessage(user);
+                } else {
+                    checkForVerificationAttempt(user);
+                }
+            } catch (DAOLayerException ex) {
+                ex.printStackTrace();
+                userView.displayErrorMessage("Ops, Something went wrong. Please try again after sometime");
+            }
+            CurrentUserCredentials.setCurrentUser(user);
+            roleManager.assignTaskAsPerRole();
         }
     }
 
@@ -75,6 +97,30 @@ public class UserService {
         }
         return true;
     }
+
+    public void checkForVerificationAttempt(User user) throws DAOLayerException {
+        int maxTrialsForVerificationCode = 1;
+        while (maxTrialsForVerificationCode < MAX_TRIALS_FOR_VERIFICATION) {
+            if (checkAccountVerification(user)) {
+                userView.displayInfoMessage("Logged in Successfully.");
+                userView.displayLoginWelcomeMessage(user);
+                break;
+            } else {
+                maxTrialsForVerificationCode++;
+                if (maxTrialsForVerificationCode == MAX_TRIALS_FOR_VERIFICATION) {
+                    OnlineFoodDelivery.main(null);
+                }
+            }
+        }
+    }
+
+    public List<User> getUserDetailsListByRoleID(int userRoleID) {
+        List<User> userList = null;
+        try {
+            userList = userDao.getUsersDetails(userRoleID);
+        } catch (DAOLayerException e) {
+            e.printStackTrace();
+        }
+        return userList;
+    }
 }
-
-

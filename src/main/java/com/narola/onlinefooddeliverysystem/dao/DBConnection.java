@@ -1,3 +1,4 @@
+/*
 package com.narola.onlinefooddeliverysystem.dao;
 
 import java.sql.Connection;
@@ -35,3 +36,4 @@ public class DBConnection {
         return con;
     }
 }
+*/
